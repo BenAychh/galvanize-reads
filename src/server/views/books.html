@@ -21,10 +21,16 @@
         <p>
           {{book.description}}
         </p>
+        {% if !del %}
+          <p>
+            <a href="/books/{{book.id}}/edit">Edit</a>
+            <a href="/books/{{book.id}}/delete">Remove</a>
+          </p>
+        {% else %}
         <p>
-          <a href="/books/{{book.id}}/edit">Edit</a>
-          <a href="/books/{{book.id}}/delete">Remove</a>
+          <a href="/books/{{book.id}}/delete/confirm">Confirm Delete: {{book.title}}</a>
         </p>
+        {% endif %}
       </section>
     {% endfor %}
   </article>

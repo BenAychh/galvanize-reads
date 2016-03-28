@@ -8,6 +8,12 @@ router.get('/', function(req, res, next) {
     res.render('books', getBooks(books, 'books.css'));
   })
 });
+router.get('/:id', function(req, res, next) {
+  queries.getBooks({id: req.params.id})
+  .then(function(books) {
+    res.render('books', getBooks(books, 'books.css'));
+  });
+});
 router.get('/new', function(req, res, next) {
   queries.getAuthors()
   .then(function(authors) {
@@ -26,12 +32,6 @@ router.post('/new', function(req, res, next) {
     res.redirect('/books/' + bookId);
   })
 })
-router.get('/:id', function(req, res, next) {
-  queries.getBooks({id: req.params.id})
-  .then(function(books) {
-    res.render('books', getBooks(books, 'books.css'));
-  });
-});
 router.get('/:id/edit', function(req, res, next) {
   var promises = [];
   promises.push(queries.getBooks({id: req.params.id}));
@@ -55,6 +55,22 @@ router.post('/:id/edit', function(req, res, next) {
     res.redirect('/books/' + req.params.id);
   });
 });
+router.get('/:id/delete', function(req, res, next) {
+  queries.getBooks({id: req.params.id})
+  .then(function(books) {
+    var params = getBooks(books, 'books.css');
+    params['del'] = true;
+    console.log(params);
+    res.render('books', params);
+  });
+});
+router.get('/:id/delete/confirm', function(req, res, next) {
+  queries.deleteBook(req.params.id)
+  .then(function() {
+    res.redirect('/books/')
+  })
+})
+
 
 function getBooks(books, stylesheet) {
   var params = {

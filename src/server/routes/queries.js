@@ -67,6 +67,9 @@ function getAuthors(params) {
   }
   return Authors()
 }
+function deleteBook(bookId) {
+  return Books().where({id: bookId}).del();
+}
 function getAuthorNamesByBook(bookId) {
   return knex.raw('select authors.id from authors '
 	+ 'inner join book_author on book_author.author_id = authors.id '
@@ -99,4 +102,5 @@ module.exports = {
   getAuthors,
   getAuthorNamesByBook,
   addBook,
+  deleteBook,
 }
