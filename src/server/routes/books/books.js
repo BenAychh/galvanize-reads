@@ -8,6 +8,24 @@ router.get('/', function(req, res, next) {
     res.render('books', getBooks(books, 'books.css'));
   })
 });
+router.get('/new', function(req, res, next) {
+  queries.getAuthors()
+  .then(function(authors) {
+    var params = {
+      stylesheet: 'newandeditbook.css',
+      authors: authors,
+      currentAuthors: [],
+    }
+    res.render('newandeditbook', params)
+  });
+});
+router.post('/new', function(req, res, next) {
+  queries.addBook(req.body)
+  .then(function(bookId) {
+    console.log(bookId);
+    res.redirect('/books/' + bookId);
+  })
+})
 router.get('/:id', function(req, res, next) {
   queries.getBooks({id: req.params.id})
   .then(function(books) {
@@ -29,7 +47,15 @@ router.get('/:id/edit', function(req, res, next) {
     }, []);
     res.render('newandeditbook', params)
   })
-})
+});
+
+router.post('/:id/edit', function(req, res, next) {
+  queries.updateBook(req.params.id, req.body)
+  .then(function() {
+    res.redirect('/books/' + req.params.id);
+  });
+});
+
 function getBooks(books, stylesheet) {
   var params = {
     books: books,

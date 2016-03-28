@@ -5,45 +5,61 @@ function Books() {
 function Authors() {
   return knex('authors');
 }
+function BooksAndAuthors() {
+  return knex('book_author');
+}
 
 function getBooks(params) {
-  if (params) {
-    return Books().where(params)
-    .then(function(books) {
-      return attachAuthorsToBooks(books);
-    })
-  }
-  return Books()
-  .then(function(books) {
-    return attachAuthorsToBooks(books);
-  });
-}
-function attachAuthorsToBooks(books) {
-  return knex.raw('select * from authors inner join book_author '
-    + 'on book_author.author_id = authors.id')
-  .then(function(authors) {
-    var returner = [];
-    books.forEach(function(book) {
-      var first = true;
-      var i = 0;
-      for (var i = 0; i < authors.length; i++) {
-        if (book.id === authors[i].book_id) {
-          var fullName = authors[i].first_name + ' ' + authors[i].last_name;
-          if (first) {
-            book['authors'] = fullName;
-            first = false;
-          } else {
-            book.authors += ' & ' + fullName;
-          }
-          authors.splice(i, 1);
-          // Since we splice out, we need to repeat the current counter.
-          i--;
-        }
+  var query = 'select books.id, books.title, books.genre, books.description, '
+  + 'books.cover_url, '
+  + 'string_agg(authors.first_name || \' \' || authors.last_name, \', \') '
+  + 'as authors from books '
+  + 'inner join book_author on book_author.book_id = books.id ';
+  if (!params) {
+    query += 'inner join authors on book_author.author_id = authors.id';
+  } else {
+    query += 'inner join authors on book_author.author_id = authors.id where ';
+    var keys = Object.keys(params);
+    keys.forEach(function(key) {
+      query += 'books.' + key + ' = ';
+      if (isNaN(params[key])) {
+        query += '\'' + params[key] + '\' AND ';
+      } else {
+        query += params[key] + ' AND ';
       }
-      returner.push(book);
-    });
-    return returner;
+    })
+    query = query.substring(0, query.length - 4);
+  }
+  query += ' group by books.id, books.title, books.genre, ' +
+  'books.description, books.cover_url order by books.id';
+  return knex.raw(query)
+  .then(function(rawResults) {
+    return rawResults.rows;
   })
+}
+function updateBook(bookId, formData) {
+  var promises = [];
+  if (!Array.isArray(formData.authors)) {
+    formData.authors = [formData.authors];
+  }
+  promises.push(updateAuthors(bookId, formData.authors));
+  delete formData.authors;
+  promises.push(Books().where({id: bookId}).update(formData));
+  return Promise.all(promises);
+}
+function addBook(formData) {
+  var authors = formData.authors;
+  if (!Array.isArray(authors)) {
+    authors = [authors];
+  }
+  delete formData.authors;
+  return Books().insert(formData, 'id')
+  .then(function(bookId) {
+    return updateAuthors(Number(bookId), authors)
+    .then(function() {
+      return Number(bookId);
+    });
+  });
 }
 function getAuthors(params) {
   if (params) {
@@ -63,9 +79,24 @@ function getAuthorNamesByBook(bookId) {
     console.log(err);
   })
 }
+function updateAuthors(bookId, arrayOfAuthors) {
+  return BooksAndAuthors().where({book_id: bookId}).del()
+  .then(function() {
+    var rows = [];
+    arrayOfAuthors.forEach(function(authorId) {
+      rows.push({
+        book_id: bookId,
+        author_id: Number(authorId),
+      })
+    })
+    return knex.batchInsert('book_author', rows, 1000)
+  })
+}
 
 module.exports = {
   getBooks,
+  updateBook,
   getAuthors,
   getAuthorNamesByBook,
+  addBook,
 }
