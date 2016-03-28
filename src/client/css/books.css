@@ -1,0 +1,11 @@
+section {
+  border: 1px solid black;
+  margin: 10px;
+  overflow: hidden;
+  padding: 10px;
+}
+section img {
+  max-width: 20%;
+  float: left;
+  margin-right: 10px;
+}
