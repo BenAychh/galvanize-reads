@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+  <link rel="stylesheet" href="/css/multi-select.css">
+  <article class="">
+    {{currentAuthors}}
+    <form class="" method="post">
+      <label for="first_name">First Name</label>
+      <input type="text" name="first_name" value="{{author.first_name}}" placeholder="First Name">
+      <label for="last_name">Last Name</label>
+      <input type="text" name="last_name" value="{{author.last_name}}" placeholder="Last Name">
+      <label for="portrait_url">Portrait Url</label>
+      <input type="text" name="portrait_url" value="{{author.portrait_url}}" placeholder="Portriat URL">
+      <label for="biography">Biography</label>
+      <textarea name="biography" rows="8" cols="40">{{author.biography}}</textarea>
+      <label for="books">Books</label>
+      <select id="keep-order" name="books" multiple="multiple">
+        {% for book in books %}
+        <option value="{{book.id}}" {% if currentBooks.indexOf(book.id) != -1 %} selected {% endif %}>{{book.title}}</option>
+        {% endfor %}
+      </select>
+      <input type="submit" value="Edit {{author.first_name}} {{author.last_name}}">
+    </form>
+  </article>
+  <script type="text/javascript" src="/js/jquery.multi-select.js"></script>
+  <script type="text/javascript">
+    $('#keep-order').multiSelect();
+  </script>
+
+
+{% endblock %}

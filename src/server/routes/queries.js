@@ -143,6 +143,56 @@ function getAuthors(params) {
     return returner;
   })
 }
+function getBookTitlesByAuthor(authorId) {
+  return knex.raw('select books.id from books '
+	+ 'inner join book_author on book_author.book_id = books.id '
+	+ 'inner join authors on authors.id = book_author.author_id '
+  + 'where authors.id = ' + authorId)
+  .then(function(rawResults) {
+    console.log(rawResults);
+    return rawResults.rows;
+  })
+  .catch(function(err) {
+    console.log(err);
+  })
+}
+function updateAuthor(authorId, formData) {
+  var promises = [];
+  if (!Array.isArray(formData.books)) {
+    formData.books = [formData.books];
+  }
+  promises.push(updateBooks(authorId, formData.books));
+  delete formData.books;
+  promises.push(Authors().where({id: authorId}).update(formData));
+  return Promise.all(promises);
+}
+function updateBooks(authorId, arrayOfBooks) {
+  return BooksAndAuthors().where({author_id: authorId}).del()
+  .then(function() {
+    var rows = [];
+    arrayOfBooks.forEach(function(bookId) {
+      rows.push({
+        author_id: authorId,
+        book_id: Number(bookId),
+      })
+    })
+    return knex.batchInsert('book_author', rows, 1000)
+  })
+}
+function addAuthor(formData) {
+  var books = formData.books;
+  if (!Array.isArray(books)) {
+    books = [books];
+  }
+  delete formData.books;
+  return Authors().insert(formData, 'id')
+  .then(function(authorId) {
+    return updateBooks(Number(authorId), books)
+    .then(function() {
+      return Number(authorId);
+    });
+  });
+}
 
 module.exports = {
   getBooks,
@@ -152,4 +202,7 @@ module.exports = {
   addBook,
   deleteBook,
   getAuthors,
+  getBookTitlesByAuthor,
+  updateAuthor,
+  addAuthor,
 }

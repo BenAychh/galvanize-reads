@@ -22,7 +22,7 @@ router.get('/new', function(req, res, next) {
       authors: authors,
       currentAuthors: [],
     }
-    res.render('newandeditbook', params)
+    res.render('newandedit', params)
   });
 });
 router.post('/new', function(req, res, next) {
@@ -39,13 +39,13 @@ router.get('/:id/edit', function(req, res, next) {
   promises.push(queries.getAuthorNamesByBook(req.params.id));
   Promise.all(promises)
   .then(function(results) {
-    var params = getBooks(results[0][0], 'newandeditbook.css');
+    var params = getBooks(results[0][0], 'newandedit.css');
     params['authors'] = results[1];
     params['currentAuthors'] = results[2].reduce(function(prev, current) {
       prev.push(current.id);
       return prev;
     }, []);
-    res.render('newandeditbook', params)
+    res.render('newandedit', params)
   })
 });
 

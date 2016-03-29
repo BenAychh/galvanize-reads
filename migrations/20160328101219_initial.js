@@ -18,8 +18,8 @@ exports.up = function(knex, Promise) {
   })
   .then(function() {
     return knex.schema.createTable('book_author', function(table) {
-      table.integer('author_id').references('id').inTable('authors').onDelete('CASCADE');
-      table.integer('book_id').references('id').inTable('books').onDelete('CASCADE');
+      table.integer('author_id').references('id').inTable('authors');
+      table.integer('book_id').references('id').inTable('books');
     });
   })
 };
