@@ -74,4 +74,21 @@ router.post('/:id/edit', function(req, res, next) {
     console.log(err);
   });
 });
+router.get('/:id/delete', function(req, res, next) {
+  queries.getAuthors({id: req.params.id})
+  .then(function(authors) {
+    var params = {
+      authors: authors,
+      stylesheet: 'authors.css',
+      del: true,
+    }
+    res.render('authors', params);
+  });
+});
+router.get('/:id/delete/confirm', function(req, res, next) {
+  queries.deleteAuthor(req.params.id)
+  .then(function() {
+    res.redirect('/authors/')
+  })
+})
 module.exports = router;

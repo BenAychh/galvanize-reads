@@ -9,3 +9,10 @@ a {
 nav span {
   text-align: center;
 }
+.sideBar {
+  width: 10%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+}
