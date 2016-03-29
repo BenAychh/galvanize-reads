@@ -25,5 +25,11 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-
+  return knex.dropTable('book_author')
+  .then(function() {
+    return knex.dropTable('authors');
+  })
+  .then(function() {
+    return knex.dropTable('books');
+  })
 };

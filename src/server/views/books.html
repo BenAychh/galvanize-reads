@@ -13,7 +13,9 @@
           {{book.title}}
         </p>
         <p>
-          {{book.authors}}
+          {% for author in book.authors %}
+          <a href="/authors/{{author.id}}/">{{author.name}}</a>
+          {% endfor %}
         </p>
         <p>
           {{book.genre}}

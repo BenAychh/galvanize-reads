@@ -12,7 +12,8 @@ function BooksAndAuthors() {
 function getBooks(params) {
   var query = 'select books.id, books.title, books.genre, books.description, '
   + 'books.cover_url, '
-  + 'string_agg(authors.first_name || \' \' || authors.last_name, \', \') '
+  + 'array_agg(authors.first_name || \''
+  +  '\' || authors.last_name || \',\' || authors.id) '
   + 'as authors from books '
   + 'inner join book_author on book_author.book_id = books.id ';
   if (!params) {
@@ -34,7 +35,17 @@ function getBooks(params) {
   'books.description, books.cover_url order by books.id';
   return knex.raw(query)
   .then(function(rawResults) {
-    return rawResults.rows;
+    var returner = [];
+    rawResults.rows.forEach(function(book) {
+      var authorArrayInBook = [];
+      book.authors.forEach(function(author) {
+        var authorArray = author.split(',');
+        authorArrayInBook.push({name: authorArray[0], id: authorArray[1]});
+      });
+      book.authors = authorArrayInBook
+      returner.push(book);
+    });
+    return returner;
   })
 }
 function updateBook(bookId, formData) {
