@@ -106,6 +106,43 @@ function updateAuthors(bookId, arrayOfAuthors) {
     return knex.batchInsert('book_author', rows, 1000)
   })
 }
+function getAuthors(params) {
+  var query = 'select authors.id, authors.first_name, authors.last_name, '
+  + ' authors.biography, authors.portrait_url, '
+  + ' array_agg(books.title || \',\' || books.id) as books from books '
+	+ ' inner join book_author on book_author.book_id = books.id ';
+  if (!params) {
+    query += 'inner join authors on book_author.author_id = authors.id';
+  } else {
+    query += 'inner join authors on book_author.author_id = authors.id where ';
+    var keys = Object.keys(params);
+    keys.forEach(function(key) {
+      query += 'authors.' + key + ' = ';
+      if (isNaN(params[key])) {
+        query += '\'' + params[key] + '\' AND ';
+      } else {
+        query += params[key] + ' AND ';
+      }
+    })
+    query = query.substring(0, query.length - 4);
+  }
+  query += ' group by authors.id; '
+  console.log(query);
+  return knex.raw(query)
+  .then(function(rawResults) {
+    var returner = [];
+    rawResults.rows.forEach(function(author) {
+      var bookArrayInAuthors = [];
+      author.books.forEach(function(book) {
+        var bookArray = book.split(',');
+        bookArrayInAuthors.push({title: bookArray[0], id: bookArray[1]});
+      });
+      author.books = bookArrayInAuthors;
+      returner.push(author);
+    });
+    return returner;
+  })
+}
 
 module.exports = {
   getBooks,
@@ -114,4 +151,5 @@ module.exports = {
   getAuthorNamesByBook,
   addBook,
   deleteBook,
+  getAuthors,
 }

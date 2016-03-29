@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block title %}{% endblock %}
+
+
+{% block content %}
+
+  <article class="">
+    {% for author in authors %}
+      <section>
+        <img src="{{author.portrait_url}}" alt="{{author.first_name}} {{author.last_name}}" />
+        <p>
+          {{author.first_name}} {{author.last_name}}
+        </p>
+        <p>
+          {{author.biography}}
+        </p>
+        <p>
+          <section>
+            <h2>Books</h2>
+            {% for book in author.books %}
+            <a href="/books/{{book.id}}/">{{book.title}}</a><br />
+            {% endfor %}
+          </section>
+
+        </p>
+        {% if !del %}
+          <p>
+            <a href="/authors/{{author.id}}/edit">Edit</a>
+            <a href="/authors/{{author.id}}/delete">Remove</a>
+          </p>
+        {% else %}
+        <p>
+          <a href="/authors/{{author.id}}/delete/confirm">Confirm Delete: {{book.title}}</a>
+        </p>
+        {% endif %}
+      </section>
+    {% endfor %}
+  </article>
+
+
+
+{% endblock %}
