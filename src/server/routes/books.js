@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var queries = require('../queries.js');
+var queries = require('./queries.js');
 
 router.get('/', function(req, res, next) {
   queries.getBooks()
